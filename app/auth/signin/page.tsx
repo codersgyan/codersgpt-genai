@@ -17,30 +17,66 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { FieldError, FieldGroup } from "@/components/ui/field";
+import {
+  FieldError,
+  FieldGroup,
+} from "@/components/ui/field";
 
 import { GithubIcon, GoogleIcon } from "../icons";
 
 const formSchema = z.object({
   email: z.email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters"),
 });
 
 type SocialProvider = "google" | "github";
 import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
-  const [pendingProvider, setPendingProvider] = useState<SocialProvider | null>(
-    null,
-  );
+  const router = useRouter();
+  const [pendingProvider, setPendingProvider] =
+    useState<SocialProvider | null>(null);
+
+  const [isLoading, setIsLoading] =
+    useState<boolean>(false);
 
   const form = useForm({
     defaultValues: { email: "", password: "" },
     validators: {
       onChange: formSchema,
     },
-    onSubmit: async ({ value }) => {},
+    onSubmit: async ({ value }) => {
+      await authClient.signIn.email(
+        {
+          email: value.email,
+          password: value.password,
+          callbackURL: "/",
+        },
+        {
+          onRequest: (ctx) => {
+            setIsLoading(true);
+          },
+          onSuccess: (ctx) => {
+            setIsLoading(false);
+            toast.success("Account created successfully!");
+            router.push("/");
+          },
+          onError: (ctx) => {
+            setIsLoading(false);
+            // todo: be careful -> server side errors should not exposed here.
+            toast.error(
+              ctx.error.message || "Registration failed.",
+            );
+          },
+        },
+      );
+    },
   });
 
   return (
@@ -58,8 +94,8 @@ export default function LoginForm() {
             Log in CodersGPT
           </CardTitle>
           <CardDescription className="mx-auto max-w-80 text-[15px] leading-relaxed text-[#b4b4b4]">
-            You&apos;ll get smarter responses and can upload files, images, and
-            more.
+            You&apos;ll get smarter responses and can upload
+            files, images, and more.
           </CardDescription>
         </CardHeader>
 
@@ -71,8 +107,7 @@ export default function LoginForm() {
               variant="outline"
               disabled={false}
               className="h-13 w-full rounded-xl border-[#424242] bg-transparent text-[15px] font-normal transition-colors hover:bg-[#2f2f2f] hover:text-white disabled:opacity-70"
-              onClick={() => {}}
-            >
+              onClick={() => {}}>
               {pendingProvider === "google" ? (
                 <Loader2 className="mr-2 size-5 animate-spin" />
               ) : (
@@ -86,8 +121,7 @@ export default function LoginForm() {
               variant="outline"
               disabled={false}
               className="h-13 w-full rounded-xl border-[#424242] bg-transparent text-[15px] font-normal transition-colors hover:bg-[#2f2f2f] hover:text-white disabled:opacity-70"
-              onClick={() => {}}
-            >
+              onClick={() => {}}>
               {pendingProvider === "github" ? (
                 <Loader2 className="mr-2 size-5 animate-spin" />
               ) : (
@@ -109,8 +143,7 @@ export default function LoginForm() {
               e.preventDefault();
               e.stopPropagation();
               form.handleSubmit();
-            }}
-          >
+            }}>
             <FieldGroup className="flex flex-col gap-1">
               {/* Email Field */}
               <form.Field
@@ -126,7 +159,9 @@ export default function LoginForm() {
                         name={field.name}
                         value={field.state.value}
                         onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
+                        onChange={(e) =>
+                          field.handleChange(e.target.value)
+                        }
                         type="email"
                         placeholder="Email address"
                         className={cn(
@@ -164,7 +199,9 @@ export default function LoginForm() {
                         name={field.name}
                         value={field.state.value}
                         onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
+                        onChange={(e) =>
+                          field.handleChange(e.target.value)
+                        }
                         type="password"
                         placeholder="Password"
                         className={cn(
@@ -195,13 +232,16 @@ export default function LoginForm() {
                   state.isSubmitting,
                   state.isDirty,
                 ]}
-                children={([canSubmit, isSubmitting, isDirty]) => (
+                children={([
+                  canSubmit,
+                  isSubmitting,
+                  isDirty,
+                ]) => (
                   <Button
                     type="submit"
                     className="mt-2 h-13 w-full rounded-full bg-[#ececec] text-[16px] font-semibold text-black hover:bg-white active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#ececec]"
-                    disabled={!canSubmit || !isDirty}
-                  >
-                    {isSubmitting ? (
+                    disabled={!canSubmit || !isDirty}>
+                    {isSubmitting || isLoading ? (
                       <Loader2 className="size-5 animate-spin" />
                     ) : (
                       "Continue"
@@ -216,7 +256,9 @@ export default function LoginForm() {
         <CardFooter className="flex flex-col items-center pb-4">
           <div className="text-sm text-[#b4b4b4]">
             Don&apos;t have an account?{" "}
-            <Link href="/auth/signup" className="text-white hover:underline">
+            <Link
+              href="/auth/signup"
+              className="text-white hover:underline">
               Sign up
             </Link>
           </div>
