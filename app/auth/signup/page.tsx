@@ -93,6 +93,22 @@ export default function SignupForm() {
     },
   });
 
+  const handleSocialLogin = async (
+    provider: SocialProvider,
+  ) => {
+    setPendingProvider("google");
+
+    try {
+      await authClient.signIn.social({
+        provider: provider,
+      });
+    } catch (err) {
+      setPendingProvider(null);
+      console.error(err);
+      toast.error("An unexpected error");
+    }
+  };
+
   return (
     <div className="flex items-center justify-center h-dvh">
       <Card className="w-full max-w-110 border-[#262626] bg-[#121212] text-white">
@@ -121,8 +137,10 @@ export default function SignupForm() {
               variant="outline"
               disabled={false}
               className="h-13 w-full rounded-xl border-[#424242] bg-transparent text-[15px] font-normal transition-colors hover:bg-[#2f2f2f] hover:text-white disabled:opacity-70"
-              onClick={() => {}}>
-              {pendingProvider === "google" ? (
+              onClick={() => {
+                handleSocialLogin("google");
+              }}>
+              {pendingProvider == "google" ? (
                 <Loader2 className="mr-2 size-5 animate-spin" />
               ) : (
                 <GoogleIcon className="mr-2 size-5" />
