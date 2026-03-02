@@ -1,0 +1,4 @@
+POST http://localhost:3000/api/chat
+content-type: application/json
+
+{}
