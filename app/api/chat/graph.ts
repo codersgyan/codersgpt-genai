@@ -13,7 +13,7 @@ const llmCall: GraphNode<typeof MessagesState> = async (
   state,
 ) => {
   // todo: receive this model id from frontend
-  const model = getDynamicModel("gemini-2.5-flash");
+  const model = getDynamicModel("gpt-5-mini");
 
   const response = await model.invoke([
     new SystemMessage("You are a helpful assistant."),
