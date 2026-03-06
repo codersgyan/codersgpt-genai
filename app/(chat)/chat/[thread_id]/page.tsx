@@ -4,12 +4,16 @@ export default async function Page({
   params,
 }: Readonly<{
   children: React.ReactNode;
-  params: Promise<{ [key: string]: string | string[] | undefined }>;
+  params: Promise<{
+    [key: string]: string | string[] | undefined;
+  }>;
 }>) {
   const { thread_id } = await params;
+
+  console.log({ thread_id });
   return (
     <>
-      <ChatInterfaceNew  />
+      <ChatInterfaceNew />
     </>
   );
 }
