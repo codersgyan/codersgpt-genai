@@ -3,13 +3,12 @@
 import { useChat } from "@ai-sdk/react";
 import InputContainer from "./input-container";
 import { useChatStore } from "@/store/chat-store";
+import MessageRenderer from "./message-renderer";
 
 export const ChatInterfaceNew = () => {
   const { chatInstance } = useChatStore();
 
   const { messages } = useChat({ chat: chatInstance });
-
-  console.log("messages", messages);
 
   return (
     <>
@@ -25,10 +24,15 @@ export const ChatInterfaceNew = () => {
       ) : (
         <div className="flex flex-col flex-1 h-full w-full min-h-0 overflow-y-scroll">
           <main className="h-full flex flex-col items-center  justify-end md:justify-center max-w-4xl mx-auto w-full px-4 -mt-20">
-            {messages.map((message) => (
-              <h1>{message.parts[0].text}</h1>
-            ))}
-            <InputContainer />
+            <div className="flex flex-col h-full w-full">
+              <div className="flex-1">
+                <MessageRenderer messages={messages} />
+              </div>
+
+              <div>
+                <InputContainer />
+              </div>
+            </div>
           </main>
         </div>
       )}

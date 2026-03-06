@@ -63,7 +63,6 @@ function InputContainer() {
           <div className="flex-1 min-w-0 items-center justify-center w-full h-full">
             <PromptInputTextarea
               onChange={(e) => {
-                console.log(e.target.value);
                 setInput(e.target.value);
               }}
               value={input}
