@@ -22,18 +22,16 @@ export const ChatInterfaceNew = () => {
           </main>
         </div>
       ) : (
-        <div className="flex flex-col flex-1 h-full w-full min-h-0 overflow-y-scroll">
-          <main className="h-full flex flex-col items-center  justify-end md:justify-center max-w-4xl mx-auto w-full px-4 -mt-20">
-            <div className="flex flex-col h-full w-full">
-              <div className="flex-1">
-                <MessageRenderer messages={messages} />
-              </div>
-
-              <div>
-                <InputContainer />
-              </div>
+        <div className="flex flex-col flex-1 h-full w-full min-h-0 overflow-hidden">
+          <div className="flex flex-col h-full w-full">
+            <div className="flex-1 min-h-0">
+              <MessageRenderer messages={messages} />
             </div>
-          </main>
+
+            <div>
+              <InputContainer />
+            </div>
+          </div>
         </div>
       )}
     </>
