@@ -4,6 +4,11 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 
+import "streamdown/styles.css";
+
+import { Toaster } from "@/components/ui/sonner";
+import { QueryProvider } from "./query-provider";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -62,9 +67,6 @@ export const metadata: Metadata = {
   manifest: `${BASE_URL}/site.webmanifest`,
 };
 
-import "streamdown/styles.css";
-
-import { Toaster } from "@/components/ui/sonner";
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -82,8 +84,10 @@ export default function RootLayout({
           defaultTheme="dark"
           enableSystem
           disableTransitionOnChange>
-          {children}
-          <Toaster />
+          <QueryProvider>
+            {children}
+            <Toaster />
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1,4 +1,9 @@
-import { Search, LayoutGrid, Plus, Loader2 } from "lucide-react";
+import {
+  Search,
+  LayoutGrid,
+  Plus,
+  Loader2,
+} from "lucide-react";
 
 import {
   Sidebar,
@@ -28,8 +33,7 @@ export async function AppSidebar({
     <Sidebar
       collapsible="icon"
       className="bg-[#171717] border-none text-sidebar-foreground transition-all duration-300 ease-in-out"
-      {...props}
-    >
+      {...props}>
       <SidebarHeader className="px-2 pt-3.5">
         <div className="flex items-center justify-between group-data-[collapsible=icon]:justify-center">
           <div className="flex items-center gap-2.5">
@@ -55,28 +59,29 @@ export async function AppSidebar({
             {[
               { title: "New chat", icon: Plus, href: "/" },
               { title: "Search", icon: Search, href: "/" },
-              { title: "Images", icon: LayoutGrid, href: "/" },
+              {
+                title: "Images",
+                icon: LayoutGrid,
+                href: "/",
+              },
             ].map((item) => (
               <SidebarMenuItem
                 key={item.title}
-                className="flex justify-cente relative"
-              >
+                className="flex justify-cente relative">
                 <SidebarMenuButton
                   tooltip={item.title}
                   className={cn(
                     "h-9 transition-colors text-[#ececec] hover:bg-[#2f2f2f] data-[state=open]:bg-[#2f2f2f]",
                     // Centering logic for collapsed state
                     "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
-                  )}
-                >
+                  )}>
                   <item.icon className="h-4.5 w-4.5 shrink-0" />
                   <span className="ml-3 text-[14px] font-normal group-data-[collapsible=icon]:hidden">
                     {item.title}
                   </span>
                   <Link
                     href={item.href}
-                    className="absolute inset-0 cursor-pointer"
-                  ></Link>
+                    className="absolute inset-0 cursor-pointer"></Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
@@ -84,7 +89,7 @@ export async function AppSidebar({
         </SidebarGroup>
 
         {/* <Suspense fallback={<Loader2 />}> */}
-          <ThreadsLists />
+        <ThreadsLists />
         {/* </Suspense> */}
       </SidebarContent>
 
