@@ -16,8 +16,6 @@ export async function POST(request: Request) {
     headers: await headers(),
   });
 
-  console.log(authData);
-
   if (!authData?.user.id) {
     return new Response(
       "Forbidden: You don't have access to this thread",
