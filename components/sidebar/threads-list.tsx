@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { Skeleton } from "../ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { fetchThreads } from "@/lib/threads";
+import Link from "next/link";
 
 type Thread = {
   title: string;
@@ -67,14 +68,16 @@ export function ThreadsLists() {
           return (
             <SidebarMenuItem
               key={thread.id}
-              className="group/item relative pointer-events-none">
-              <SidebarMenuButton
-                className={cn(
-                  "h-9 rounded-lg transition-all px-3 pr-10 cursor-pointer",
-                  "hover:bg-transparent",
-                )}>
-                <span>{thread.title}</span>
-              </SidebarMenuButton>
+              className="group/item relative">
+              <Link href={`/chat/${thread.id}`}>
+                <SidebarMenuButton
+                  className={cn(
+                    "h-9 rounded-lg transition-all px-3 pr-10 cursor-pointer",
+                    "hover:bg-transparent",
+                  )}>
+                  <span>{thread.title}</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
           );
         })
