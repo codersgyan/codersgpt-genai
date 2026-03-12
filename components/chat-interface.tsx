@@ -6,6 +6,10 @@ import { useChatStore } from "@/store/chat-store";
 import MessageRenderer from "./message-renderer";
 import { StoredMessage } from "@langchain/core/messages";
 import { convertLangChainToUI } from "@/lib/converters";
+import {
+  Conversation,
+  ConversationContent,
+} from "./ai-elements/conversation";
 
 export const ChatInterfaceNew = ({
   oldMessages,
@@ -37,10 +41,14 @@ export const ChatInterfaceNew = ({
         <div className="flex flex-col flex-1 h-full w-full min-h-0 overflow-hidden">
           <div className="flex flex-col h-full w-full">
             <div className="flex-1 min-h-0">
-              <MessageRenderer
-                messages={convertedOldMessages}
-              />
-              <MessageRenderer messages={messages} />
+              <Conversation className="h-full">
+                <ConversationContent>
+                  <MessageRenderer
+                    messages={convertedOldMessages}
+                  />
+                  <MessageRenderer messages={messages} />
+                </ConversationContent>
+              </Conversation>
             </div>
 
             <div>
