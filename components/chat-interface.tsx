@@ -42,7 +42,7 @@ export const ChatInterfaceNew = ({
           <div className="flex flex-col h-full w-full">
             <div className="flex-1 min-h-0">
               <Conversation className="h-full">
-                <ConversationContent>
+                <ConversationContent className="max-w-200 mx-auto px-4 pt-4">
                   <MessageRenderer
                     messages={convertedOldMessages}
                   />

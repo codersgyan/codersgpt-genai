@@ -62,7 +62,7 @@ export const productTool = tool(
               thumbnail: product.thumbnail,
               product_link:
                 product.product_link +
-                "&utm_sourc=codersgpt.com",
+                "&utm_source=codersgpt.com",
             };
           },
         );
