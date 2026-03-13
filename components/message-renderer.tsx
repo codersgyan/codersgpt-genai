@@ -13,6 +13,7 @@ import {
   MessageContent,
   MessageResponse,
 } from "./ai-elements/message";
+import { ProductCarousel } from "./gen-ui/product-carousel";
 
 const MessageRenderer = ({
   messages,
@@ -58,6 +59,28 @@ const MessageRenderer = ({
                       )}
                   </Fragment>
                 );
+              case "dynamic-tool":
+                switch (part.toolName) {
+                  case "display_products":
+                    if (part.state === "output-available") {
+                      const toolContent = JSON.parse(
+                        (part.output as any).kwargs.content,
+                      );
+
+                      return (
+                        <div
+                          key={`${part.toolCallId}-${i}`}>
+                          <ProductCarousel
+                            query={toolContent.query}
+                            products={toolContent.products}
+                          />
+                        </div>
+                      );
+                    }
+                  default:
+                    return null;
+                }
+
               default:
                 return null;
             }
