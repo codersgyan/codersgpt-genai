@@ -11,6 +11,8 @@ import { toUIMessageStream } from "@ai-sdk/langchain";
 // /api/chat
 export async function POST(request: Request) {
   const { threadId, messageContent } = await request.json();
+  // todo: receive this from frontend
+  const selectModel = "gpt-5-mini";
 
   const authData = await auth.api.getSession({
     headers: await headers(),
@@ -61,6 +63,10 @@ export async function POST(request: Request) {
       version: "v2",
       configurable: {
         thread_id: threadId,
+      },
+      context: {
+        userId: authData?.user.id,
+        selectedModel: selectModel,
       },
     },
   );

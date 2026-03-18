@@ -5,6 +5,8 @@ import {
   START,
   StateGraph,
 } from "@langchain/langgraph";
+import { waitUntil } from "@vercel/functions";
+
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import {
   AIMessage,
@@ -15,12 +17,17 @@ import { PostgresSaver } from "@langchain/langgraph-checkpoint-postgres";
 import { MessagesState } from "./state";
 import { getDynamicModel } from "./model";
 import { tools } from "./tools";
+import { ingestEventToPolar } from "@/lib/polar";
 
 const llmCall: GraphNode<typeof MessagesState> = async (
   state,
+  runtime,
 ) => {
   // todo: receive this model id from frontend
-  const model = getDynamicModel("gpt-5-mini");
+  const selectedModel = runtime.context?.selectedModel;
+  const userId = runtime.context?.userId;
+
+  const model = getDynamicModel(selectedModel);
 
   const modelWithTools = model.bindTools(tools);
 
@@ -28,6 +35,21 @@ const llmCall: GraphNode<typeof MessagesState> = async (
     new SystemMessage("You are a helpful assistant."),
     ...state.messages,
   ]);
+
+  const usage = response.usage_metadata;
+
+  waitUntil(
+    (async () => {
+      // todo: error handling (try, catch)
+      await ingestEventToPolar({
+        userId,
+        model: selectedModel,
+        inputTokens: usage?.input_tokens || 0,
+        outputTokens: usage?.output_tokens || 0,
+        total_tokens: usage?.total_tokens || 0,
+      });
+    })(),
+  );
 
   return {
     messages: [response],
