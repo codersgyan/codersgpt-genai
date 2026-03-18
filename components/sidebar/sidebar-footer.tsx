@@ -9,7 +9,11 @@ import {
   Sparkles,
 } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +31,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Skeleton } from "../ui/skeleton";
 import { Spinner } from "../ui/spinner";
+import Link from "next/link";
 
 export function SidebarFooterComponent() {
   const { isMobile } = useSidebar();
@@ -47,15 +52,17 @@ export function SidebarFooterComponent() {
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton
                 size="lg"
-                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-              >
+                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
                 {isPending ? (
                   <div className="h-8! w-8! text-muted-foreground flex justify-center items-center">
                     <Spinner />
                   </div>
                 ) : (
                   <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src={user.image} alt={user.name} />
+                    <AvatarImage
+                      src={user.image}
+                      alt={user.name}
+                    />
                     <AvatarFallback>
                       <Skeleton className="h-full w-full rounded-full" />
                     </AvatarFallback>
@@ -63,8 +70,12 @@ export function SidebarFooterComponent() {
                 )}
 
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
+                  <span className="truncate font-medium">
+                    {user.name}
+                  </span>
+                  <span className="truncate text-xs">
+                    {user.email}
+                  </span>
                 </div>
                 <ChevronsUpDown className="ml-auto size-4" />
               </SidebarMenuButton>
@@ -73,19 +84,25 @@ export function SidebarFooterComponent() {
               className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
               side={isMobile ? "bottom" : "right"}
               align="end"
-              sideOffset={4}
-            >
+              sideOffset={4}>
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                   <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src={user.image} alt={user.name} />
+                    <AvatarImage
+                      src={user.image}
+                      alt={user.name}
+                    />
                     <AvatarFallback>
                       <Skeleton className="h-full w-full rounded-full" />
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">{user.name}</span>
-                    <span className="truncate text-xs">{user.email}</span>
+                    <span className="truncate font-medium">
+                      {user.name}
+                    </span>
+                    <span className="truncate text-xs">
+                      {user.email}
+                    </span>
                   </div>
                 </div>
               </DropdownMenuLabel>
@@ -99,8 +116,12 @@ export function SidebarFooterComponent() {
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem>
-                  <BadgeCheck />
-                  Account
+                  <Link
+                    href="/profile"
+                    className="flex items-center gap-2">
+                    <BadgeCheck />
+                    Account
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <CreditCard />

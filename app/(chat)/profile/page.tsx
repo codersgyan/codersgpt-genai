@@ -22,29 +22,78 @@ import {
   Sparkles,
   Zap,
 } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
+import { useQuery } from "@tanstack/react-query";
+import {
+  getCutomerMeters,
+  isUserHaveSubscription,
+} from "@/lib/polar";
 
 export default function ChatbotUserProfile() {
-  // ── Static user data (replace with auth session later) ──
-  const user = {
-    name: "Jane Doe",
-    email: "jane.doe@example.com",
-    image: "/logo.png",
-  };
+  const { data: session } = authClient.useSession();
 
-  // ── Static subscription state (replace with API call later) ──
-  const isProSubscription = true;
+  const { data: isProSubscription, isPending } = useQuery({
+    queryKey: ["customer_subscription"],
+    queryFn: async () => {
+      return isUserHaveSubscription();
+    },
+  });
 
-  // ── Static usage/meter data (replace with API call later) ──
-  const usageData = {
-    creditedUnits: 100000,
-    consumedUnits: 42500,
-    balance: 57500,
-    createdAt: "2025-11-15T00:00:00.000Z",
-  };
+  const { data: usageData, isSuccess: isUsageDataSuccess } =
+    useQuery({
+      queryKey: ["customer_meters"],
+      queryFn: async () => {
+        return getCutomerMeters();
+      },
+    });
 
-  const usagePercent =
-    (usageData.consumedUnits / usageData.creditedUnits) *
-    100;
+  /**
+   * [
+  {
+    id: '0b1080b5-2664-4044-87f8-8ccd0dd4f364',
+    createdAt: 2026-03-16T11:52:39.876Z,
+    modifiedAt: 2026-03-18T10:17:25.392Z,
+    customerId: '2867c8d2-3213-421d-af7a-85502c9bca6d',
+    meterId: '2e17b9f2-c09f-4741-92af-90dce0784171',
+    consumedUnits: 772,
+    creditedUnits: 500,
+    balance: -272,
+    customer: {
+      id: '2867c8d2-3213-421d-af7a-85502c9bca6d',
+      createdAt: 2026-03-16T11:52:21.732Z,
+      modifiedAt: 2026-03-16T11:53:52.393Z,
+      metadata: {},
+      externalId: 'GsepA34qGOdPVsC11xXq0oEJciq9rQtX',
+      email: 'cgcg@codersgyan.com',
+      emailVerified: false,
+      type: 'individual',
+      name: 'cgcg',
+      billingAddress: [Object],
+      taxId: null,
+      locale: 'en-US',
+      organizationId: 'aaaa6f67-1723-425f-87e5-8bf8011fa322',
+      deletedAt: null,
+      avatarUrl: 'https://img.logo.dev/codersgyan.com?size=64&retina=true&token=pk_F9AlCmtZTqK_Ky1UDqCs9Q&fallback=404'
+    },
+    meter: {
+      metadata: {},
+      createdAt: 2026-03-16T11:26:15.449Z,
+      modifiedAt: 2026-03-18T10:17:56.290Z,
+      id: '2e17b9f2-c09f-4741-92af-90dce0784171',
+      name: 'llm_tokens',
+      filter: [Object],
+      aggregation: [Object],
+      organizationId: 'aaaa6f67-1723-425f-87e5-8bf8011fa322',
+      archivedAt: null
+    }
+  }
+]
+   */
+
+  if (!session) {
+    return <></>;
+  }
+  const user = session.user;
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6 p-4">
@@ -91,19 +140,27 @@ export default function ChatbotUserProfile() {
           </div>
 
           <div className="flex gap-3">
-            {isProSubscription ? (
+            {!isProSubscription && !isPending ? (
+              <Button
+                onClick={async () => {
+                  await authClient.checkout({
+                    slug: "Pro",
+                  });
+                }}>
+                <Sparkles />
+                Upgrade to Pro
+              </Button>
+            ) : (
               <Button className="bg-[#373669] border-[#3e3e4a] text-white hover:bg-[#373669]/90 text-[12px] font-medium">
                 <Sparkles />
                 Pro Member
               </Button>
-            ) : (
-              <Button>
-                <Sparkles />
-                Upgrade to Pro
-              </Button>
             )}
 
             <Button
+              onClick={async () => {
+                await authClient.customer.portal();
+              }}
               variant="outline"
               className="rounded-xl">
               Manage Billing
@@ -144,11 +201,13 @@ export default function ChatbotUserProfile() {
                   <CalendarDays className="h-4 w-4" />{" "}
                   Purchased
                 </div>
-                <span>
-                  {new Date(
-                    usageData.createdAt,
-                  ).toLocaleDateString()}
-                </span>
+                {isUsageDataSuccess && usageData && (
+                  <span>
+                    {new Date(
+                      usageData.createdAt,
+                    ).toLocaleDateString()}
+                  </span>
+                )}
               </div>
             </div>
           </CardContent>
@@ -165,50 +224,63 @@ export default function ChatbotUserProfile() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="p-4 rounded-2xl bg-muted/40 border">
-                <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                  <Zap className="h-4 w-4" /> Monthly Limit
-                </div>
-                <p className="text-xl font-semibold pt-2">
-                  {usageData.creditedUnits}
-                </p>
-              </div>
+            {isUsageDataSuccess && usageData && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="p-4 rounded-2xl bg-muted/40 border">
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                      <Zap className="h-4 w-4" /> Monthly
+                      Limit
+                    </div>
+                    <p className="text-xl font-semibold pt-2">
+                      {usageData.creditedUnits}
+                    </p>
+                  </div>
 
-              <div className="p-4 rounded-2xl bg-muted/40 border">
-                <div className="text-muted-foreground text-sm">
-                  Current Usage
-                </div>
-                <p className="text-xl font-semibold pt-2">
-                  {usageData.consumedUnits}
-                </p>
-              </div>
+                  <div className="p-4 rounded-2xl bg-muted/40 border">
+                    <div className="text-muted-foreground text-sm">
+                      Current Usage
+                    </div>
+                    <p className="text-xl font-semibold pt-2">
+                      {usageData.consumedUnits}
+                    </p>
+                  </div>
 
-              <div className="p-4 rounded-2xl bg-muted/40 border">
-                <div className="text-muted-foreground text-sm">
-                  Remaining
+                  <div className="p-4 rounded-2xl bg-muted/40 border">
+                    <div className="text-muted-foreground text-sm">
+                      Remaining
+                    </div>
+                    <p className="text-xl font-semibold pt-2">
+                      {usageData.balance}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-xl font-semibold pt-2">
-                  {usageData.balance}
-                </p>
-              </div>
-            </div>
 
-            <div className="space-y-3">
-              <Progress
-                value={usagePercent}
-                className="h-3 rounded-xl"
-              />
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">
-                  {usagePercent.toFixed(1)}% of monthly
-                  quota used
-                </span>
-                <span className="font-medium">
-                  Resets on Month End
-                </span>
-              </div>
-            </div>
+                <div className="space-y-3">
+                  <Progress
+                    value={
+                      (usageData.consumedUnits /
+                        usageData.creditedUnits) *
+                      100
+                    }
+                    className="h-3 rounded-xl"
+                  />
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      {(
+                        (usageData.consumedUnits /
+                          usageData.creditedUnits) *
+                        100
+                      ).toFixed(1)}
+                      % of monthly quota used
+                    </span>
+                    <span className="font-medium">
+                      Resets on Month End
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>

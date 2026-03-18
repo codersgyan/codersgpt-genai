@@ -1,4 +1,7 @@
-import { polarClient } from "./auth";
+"use server";
+
+import { headers } from "next/headers";
+import { auth, polarClient } from "./auth";
 
 type ingestData = {
   userId: string;
@@ -7,6 +10,44 @@ type ingestData = {
   outputTokens: number;
   total_tokens: number;
 };
+
+export async function isUserHaveSubscription() {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user.id) {
+      return false;
+    }
+
+    const data = await polarClient.subscriptions.list({
+      externalCustomerId: session.user.id,
+      active: true,
+    });
+
+    return data.result.items.length > 0;
+  } catch (error) {
+    console.log("erx", error);
+    return false;
+  }
+}
+
+export async function getCutomerMeters() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    throw new Error("User not logged in");
+  }
+
+  const meters = await polarClient.customerMeters.list({
+    externalCustomerId: session.user.id,
+  });
+
+  return meters.result.items[0];
+}
 
 export async function ingestEventToPolar(data: ingestData) {
   await polarClient.events.ingest({
