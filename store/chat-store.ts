@@ -4,6 +4,8 @@ import { create } from "zustand";
 
 export interface ChatStoreState {
   chatInstance: Chat<UIMessage>;
+  selectedModel: string;
+  setSelectedModel: (modelId: string) => void;
 }
 
 function createChat() {
@@ -29,6 +31,7 @@ function createChat() {
           body: {
             messageContent: lastMessageText,
             threadId: body?.threadId,
+            selectedModel: body?.selectedModel,
           },
         };
       },
@@ -39,5 +42,9 @@ function createChat() {
 export const useChatStore = create<ChatStoreState>(
   (set) => ({
     chatInstance: createChat(),
+    selectedModel: "gpt-5-mini",
+    setSelectedModel: (modelId) => {
+      set({ selectedModel: modelId });
+    },
   }),
 );

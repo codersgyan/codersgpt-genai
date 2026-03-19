@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback, useState } from "react";
+import { useState } from "react";
 import { CheckIcon, Lock } from "lucide-react";
 
 import {
@@ -18,6 +18,7 @@ import {
 } from "@/components/ai-elements/model-selector";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useChatStore } from "@/store/chat-store";
 
 const models = [
   {
@@ -49,7 +50,12 @@ const models = [
     chefSlug: "anthropic",
     id: "claude-sonnet-4-20250514",
     name: "Claude 4 Sonnet",
-    providers: ["anthropic", "azure", "google-vertex", "amazon-bedrock"],
+    providers: [
+      "anthropic",
+      "azure",
+      "google-vertex",
+      "amazon-bedrock",
+    ],
     isProOnly: true,
   },
 ];
@@ -61,77 +67,91 @@ interface ModelItemProps {
   isLocked: boolean;
 }
 
-const ModelItem = memo(
-  ({ model, selectedModel, onSelect, isLocked }: ModelItemProps) => {
-    const handleSelect = useCallback(() => {
-      // Prevent selection if the model is locked
-      if (isLocked) return;
-      onSelect(model.id);
-    }, [onSelect, model.id, isLocked]);
+const ModelItem = ({
+  model,
+  selectedModel,
+  onSelect,
+  isLocked,
+}: ModelItemProps) => {
+  const handleSelect = () => {
+    // Prevent selection if the model is locked
+    if (isLocked) return;
+    onSelect(model.id);
+  };
 
-    return (
-      <ModelSelectorItem
-        key={model.id}
-        onSelect={handleSelect}
-        value={model.id}
-        disabled={isLocked}
-        className={cn(
-          "flex items-center gap-2",
-          isLocked && "opacity-50 cursor-not-allowed text-muted-foreground",
-        )}
-      >
-        <ModelSelectorLogo provider={model.chefSlug} />
-        <ModelSelectorName>{model.name}</ModelSelectorName>
-        <ModelSelectorLogoGroup className={cn(isLocked && "opacity-50")}>
-          {model.providers.map((provider) => (
-            <ModelSelectorLogo key={provider} provider={provider} />
-          ))}
-        </ModelSelectorLogoGroup>
+  return (
+    <ModelSelectorItem
+      key={model.id}
+      onSelect={handleSelect}
+      value={model.id}
+      disabled={isLocked}
+      className={cn(
+        "flex items-center gap-2",
+        isLocked &&
+          "opacity-50 cursor-not-allowed text-muted-foreground",
+      )}>
+      <ModelSelectorLogo provider={model.chefSlug} />
+      <ModelSelectorName>{model.name}</ModelSelectorName>
+      <ModelSelectorLogoGroup
+        className={cn(isLocked && "opacity-50")}>
+        {model.providers.map((provider) => (
+          <ModelSelectorLogo
+            key={provider}
+            provider={provider}
+          />
+        ))}
+      </ModelSelectorLogoGroup>
 
-        {/* Status Indicators */}
-        <div className="ml-auto flex items-center justify-end w-5">
-          {isLocked ? (
-            <Lock className="size-4 text-muted-foreground" />
-          ) : selectedModel === model.id ? (
-            <CheckIcon className="size-4" />
-          ) : null}
-        </div>
-      </ModelSelectorItem>
-    );
-  },
-);
-
-ModelItem.displayName = "ModelItem";
+      {/* Status Indicators */}
+      <div className="ml-auto flex items-center justify-end w-5">
+        {isLocked ? (
+          <Lock className="size-4 text-muted-foreground" />
+        ) : selectedModel === model.id ? (
+          <CheckIcon className="size-4" />
+        ) : null}
+      </div>
+    </ModelSelectorItem>
+  );
+};
 
 export const ModelSelectorComponent = () => {
   const [open, setOpen] = useState(false);
-  
-  const selectedModel = "gpt-5-mini"
-  const setSelectedModel = (modelId:string)=>{
 
-  }
+  const { selectedModel, setSelectedModel } =
+    useChatStore();
+
   const userHaveProPlan = false;
-  const handleModelSelect = useCallback((id: string) => {
+  const handleModelSelect = (id: string) => {
     setSelectedModel(id);
     setOpen(false);
-  }, []);
+  };
 
-  const selectedModelData = models.find((model) => model.id === selectedModel);
+  const selectedModelData = models.find(
+    (model) => model.id === selectedModel,
+  );
 
   // Get unique chefs in order of appearance
-  const chefs = [...new Set(models.map((model) => model.chef))];
+  const chefs = [
+    ...new Set(models.map((model) => model.chef)),
+  ];
 
   return (
     <div className="flex size-full items-center justify-center">
       <ModelSelector onOpenChange={setOpen} open={open}>
         <ModelSelectorTrigger asChild>
-          <Button className="w-50 justify-between" variant="outline">
+          <Button
+            className="w-50 justify-between"
+            variant="outline">
             <div className="flex items-center gap-2">
               {selectedModelData?.chefSlug && (
-                <ModelSelectorLogo provider={selectedModelData.chefSlug} />
+                <ModelSelectorLogo
+                  provider={selectedModelData.chefSlug}
+                />
               )}
               {selectedModelData?.name && (
-                <ModelSelectorName>{selectedModelData.name}</ModelSelectorName>
+                <ModelSelectorName>
+                  {selectedModelData.name}
+                </ModelSelectorName>
               )}
             </div>
           </Button>
@@ -139,7 +159,9 @@ export const ModelSelectorComponent = () => {
         <ModelSelectorContent>
           <ModelSelectorInput placeholder="Search models..." />
           <ModelSelectorList>
-            <ModelSelectorEmpty>No models found.</ModelSelectorEmpty>
+            <ModelSelectorEmpty>
+              No models found.
+            </ModelSelectorEmpty>
             {chefs.map((chef) => (
               <ModelSelectorGroup heading={chef} key={chef}>
                 {models
@@ -147,7 +169,8 @@ export const ModelSelectorComponent = () => {
                   .map((model) => {
                     // Determine if the current model should be locked
                     // If the query is pending, data is undefined, so Pro models default to locked
-                    const isLocked = model.isProOnly && !userHaveProPlan;
+                    const isLocked =
+                      model.isProOnly && !userHaveProPlan;
 
                     return (
                       <ModelItem

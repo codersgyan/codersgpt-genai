@@ -16,6 +16,8 @@ import { v4 as uuidv4 } from "uuid";
 import { useChatStore } from "@/store/chat-store";
 
 function InputContainer() {
+  const { selectedModel } = useChatStore();
+
   const router = useRouter();
   const params = useParams();
 
@@ -42,7 +44,7 @@ function InputContainer() {
           sendMessage(message, {
             body: {
               threadId: finalThreadId,
-              // todo: selected model
+              selectedModel: selectedModel,
             },
           });
 
