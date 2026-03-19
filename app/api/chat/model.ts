@@ -4,7 +4,7 @@ import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 type ModelProvider = "openai" | "google" | "anthropic";
 type ModelTier = "free" | "subscription";
 
-type ModelId =
+export type ModelId =
   | "gpt-5-mini"
   | "gpt-5-nano"
   | "gemini-3.1-pro-preview"
@@ -16,28 +16,29 @@ type ModelConfig = {
   options?: Record<string, unknown>;
 };
 
-const MODEL_REGISTRY: Record<ModelId, ModelConfig> = {
-  "gpt-5-mini": {
-    provider: "openai",
-    tier: "free",
-    options: { reasoning: { effort: "minimal" } },
-  },
-  "gpt-5-nano": {
-    provider: "openai",
-    tier: "free",
-    options: { reasoning: { effort: "minimal" } },
-  },
-  "gemini-3.1-pro-preview": {
-    provider: "google",
-    tier: "subscription",
-    options: { temparature: 0 },
-  },
-  "gemini-2.5-flash": {
-    provider: "google",
-    tier: "free",
-    options: { temparature: 0 },
-  },
-};
+export const MODEL_REGISTRY: Record<ModelId, ModelConfig> =
+  {
+    "gpt-5-mini": {
+      provider: "openai",
+      tier: "free",
+      options: { reasoning: { effort: "minimal" } },
+    },
+    "gpt-5-nano": {
+      provider: "openai",
+      tier: "free",
+      options: { reasoning: { effort: "minimal" } },
+    },
+    "gemini-3.1-pro-preview": {
+      provider: "google",
+      tier: "subscription",
+      options: { temparature: 0 },
+    },
+    "gemini-2.5-flash": {
+      provider: "google",
+      tier: "subscription",
+      options: { temparature: 0 },
+    },
+  };
 
 function getDefaultModel() {
   return new ChatOpenAI({
@@ -76,10 +77,6 @@ function createModel(
 export function getDynamicModel(modelId: ModelId) {
   const config = MODEL_REGISTRY[modelId];
   if (!config) return getDefaultModel();
-
-  if (config.tier === "subscription") {
-    // todo: get subscription information from db
-  }
 
   return createModel(modelId, config);
 }

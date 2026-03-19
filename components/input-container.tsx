@@ -30,9 +30,15 @@ function InputContainer() {
 
   const { chatInstance } = useChatStore();
 
-  const { messages, sendMessage } = useChat({
+  const { messages, sendMessage, error } = useChat({
     chat: chatInstance,
   });
+
+  if (error) {
+    // todo: move this to global store.
+    alert(error.message);
+    return;
+  }
 
   return (
     <div className="flex flex-col items-center w-full max-w-200 mx-auto pb-6">

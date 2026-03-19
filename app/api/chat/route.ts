@@ -3,10 +3,11 @@ import { agent } from "./graph";
 import { db } from "@/db";
 import { thread } from "@/db/schema/chat-schema";
 import { eq } from "drizzle-orm";
-import { auth } from "@/lib/auth";
+import { auth, polarClient } from "@/lib/auth";
 import { headers } from "next/headers";
 import { createUIMessageStreamResponse } from "ai";
 import { toUIMessageStream } from "@ai-sdk/langchain";
+import { MODEL_REGISTRY, ModelId } from "./model";
 
 // /api/chat
 export async function POST(request: Request) {
@@ -52,6 +53,36 @@ export async function POST(request: Request) {
       "Forbidden: You don't have access to this thread",
       { status: 403 },
     );
+  }
+
+  try {
+    const modelToBeUsed =
+      MODEL_REGISTRY[selectedModel as ModelId];
+
+    if (modelToBeUsed.tier === "subscription") {
+      // todo: caching
+      const data = await polarClient.subscriptions.list({
+        externalCustomerId: authData.user.id,
+        active: true,
+      });
+
+      const hasPro = data.result.items.length > 0;
+
+      if (!hasPro) {
+        return new Response(
+          "This model needs a subscription",
+          {
+            status: 403,
+          },
+        );
+      }
+    }
+  } catch (error) {
+    console.log("erx", error);
+
+    return new Response("This model needs a subscription", {
+      status: 403,
+    });
   }
 
   const stream = await agent.streamEvents(

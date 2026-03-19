@@ -23,7 +23,6 @@ const llmCall: GraphNode<typeof MessagesState> = async (
   state,
   runtime,
 ) => {
-  // todo: receive this model id from frontend
   const selectedModel = runtime.context?.selectedModel;
   const userId = runtime.context?.userId;
 

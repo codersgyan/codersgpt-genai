@@ -19,6 +19,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useChatStore } from "@/store/chat-store";
+import { useQuery } from "@tanstack/react-query";
+import { isUserHaveSubscription } from "@/lib/polar";
 
 const models = [
   {
@@ -120,7 +122,13 @@ export const ModelSelectorComponent = () => {
   const { selectedModel, setSelectedModel } =
     useChatStore();
 
-  const userHaveProPlan = false;
+  const { data: userHaveProPlan } = useQuery({
+    queryKey: ["customer_subscription"],
+    queryFn: async () => {
+      return isUserHaveSubscription();
+    },
+  });
+
   const handleModelSelect = (id: string) => {
     setSelectedModel(id);
     setOpen(false);
